@@ -1,4 +1,6 @@
 /.env
-/app.py
 /vrx_reports.xlsx
 /~$vrx_reports.xlsx
+/__pycache__
+/report
+/venv
