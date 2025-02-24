@@ -9,8 +9,12 @@ import util
 
 
 def gen_assets_report(headers, urldashboard, fr0m, siz3):
-    endpoints_map = assets_report.get_endpoints()
+    endpoints_map = assets_report.get_endpoints(headers, urldashboard, fr0m, siz3)
     
+    util.control_rate(50)
+    
+    for key in endpoints_map:
+        assets_report.get_endpoint_attributes(headers, urldashboard, fr0m, siz3, endpoints_map, key)
     
     return endpoints_map
 
@@ -20,6 +24,7 @@ def gen_vuln_report(headers, urldashboard, fr0m, siz3, timestamp, endpoints_map)
     
     
     return vuln_report
+
 
 if __name__ == "__main__":
     API_KEY, API_URL = util.load_configuration()

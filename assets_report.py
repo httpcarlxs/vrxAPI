@@ -16,11 +16,35 @@ def get_endpoints(headers, urldashboard, fr0m, siz3):
     endpoints_map = {}
     
     for i in parsed['serverResponseObject']:
-        endpointUpdatedAt = str((i['endpointUpdatedAt']))
-        operatingSystemName = (i['endpointOperatingSystem']['operatingSystemName'])
-        agentVersion = (i['endpointVersion']['versionName'])
+        endpoint_updated_at = str((i['endpointUpdatedAt']))
+        os_name = (i['endpointOperatingSystem']['operatingSystemName'])
+        agent_version = (i['endpointVersion']['versionName'])
         
-        endpoints_map[i['endpointHash']] = [('Hostname', i['endpointName']), ('Sistema Operacional', operatingSystemName), ('Agent Version', agentVersion)]
+        endpoints_map[i['endpointHash']] = [('Hostname', i['endpointName']), ('Sistema Operacional', os_name), ('Agent Version', agent_version)]
         
-    
     return endpoints_map
+
+
+def get_endpoint_attributes(headers, urldashboard, fr0m, siz3, endpoints_map, endpoint_hash):
+    params = {
+        'from': fr0m,
+        'size': siz3,
+        'q': 'endpointAttributesEndpoint.endpointHash==' + endpoint_hash
+    }
+
+    try:
+        response = requests.get(urldashboard + '/vicarius-external-data-api/endpointAttributes/search', params=params, headers=headers)
+        parsed = json.loads(response.text) 
+        
+    except:
+        print(f"Falha ao consultar atributos do endpoint: {endpoints_map[endpoint_hash][0][1]}.")
+    
+    ipAddresses = ''
+
+    for obj in parsed['serverResponseObject']:
+        for line in obj:
+            if line == 'endpointAttributesAttribute':
+                if 'IP' in obj[line]['attributeAttributeSource']['attributeSourceName']:
+                    ipAddresses += obj[line]['attributeExternalId'] + ', '
+                    
+    endpoints_map[endpoint_hash].append(('IP', ipAddresses[:-2]))
