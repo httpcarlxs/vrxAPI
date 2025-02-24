@@ -17,6 +17,14 @@ def gen_assets_report(headers, urldashboard, fr0m, siz3):
         
         util.control_rate()
         assets_report.get_endpoint_patches(headers, urldashboard, fr0m, siz3, endpoints_map, key)
+        
+        util.control_rate()
+        events_count, response, errors = assets_report.get_endpoint_event_count(headers, urldashboard, fr0m, siz3, key)
+        if response:
+            endpoints_map[key].append(('CVE\'s', events_count))
+        else:
+            for error in errors:
+                print(error)
     
     return endpoints_map
 

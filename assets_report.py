@@ -1,4 +1,4 @@
-import os, requests, json
+import util, requests, json
 
 def get_endpoints(headers, urldashboard, fr0m, siz3):
     params = {
@@ -38,6 +38,7 @@ def get_endpoint_attributes(headers, urldashboard, fr0m, siz3, endpoints_map, en
         
     except:
         print(f"Falha ao consultar atributos do endpoint: {endpoints_map[endpoint_hash][0][1]}.")
+        return
     
     ipAddresses = ''
 
@@ -65,6 +66,7 @@ def get_endpoints_count(headers, urldashboard):
     except:
         print("something is wrong, will try again....")
         print("response: ", response.text)
+        return
 
     return response_count
 
@@ -88,8 +90,8 @@ def get_endpoint_patches(headers, urldashboard, fr0m, siz3, endpoints_map, endpo
         parsed = json.loads(response.text)
           
     except:
-        print(f"Falha ao consultar atributos do endpoint: {endpoints_map[endpoint_hash][0][1]}.")
-        return endpoint_hash
+        print(f"Falha ao consultar patches do endpoint: {endpoints_map[endpoint_hash][0][1]}.")
+        return
 
     str_endpoint_patches = ""
     str_endpoint_app_patches = ""
@@ -118,3 +120,46 @@ def get_endpoint_patches(headers, urldashboard, fr0m, siz3, endpoints_map, endpo
     endpoints_map[endpoint_hash].append(('Atualizações', patches_count))
     endpoints_map[endpoint_hash].append(('Atualizações do SO', so_patches))
     endpoints_map[endpoint_hash].append(('Atualizações de Apps', app_patches))
+
+
+def get_endpoint_event_count(headers, urldashboard, fr0m, siz3, endpointHash, trycount=0):
+    errors = []
+
+    params = {
+        'from': fr0m,
+        'size': siz3,
+        'q': 'organizationEndpointVulnerabilitiesEndpoint.endpointHash=in=('+endpointHash+')',
+        'includeFields' : 'organizationEndpointVulnerabilitiesEndpoint.endpointId,organizationEndpointVulnerabilitiesEndpoint.endpointHash,organizationEndpointVulnerabilitiesVulnerability.vulnerabilityExternalReference.externalReferenceExternalId,organizationEndpointVulnerabilitiesVulnerability.vulnerabilityId,organizationEndpointVulnerabilitiesProduct.productName,organizationEndpointVulnerabilitiesOperatingSystem.operatingSystemName,organizationEndpointVulnerabilitiesVersion.versionName,organizationEndpointVulnerabilitiesSubVersion.subVersionName,organizationEndpointVulnerabilitiesProductRawEntry.productRawEntryName,organizationEndpointVulnerabilitiesVulnerability.vulnerabilitySensitivityLevel.sensitivityLevelName,organizationEndpointVulnerabilitiesVulnerability.vulnerabilitySummary,organizationEndpointVulnerabilitiesEndpoint.endpointName,organizationEndpointVulnerabilitiesPatch.patchId,organizationEndpointVulnerabilitiesPatch.patchName,organizationEndpointVulnerabilitiesPatch.patchReleaseDate,organizationEndpointVulnerabilitiesCreatedAt,organizationEndpointVulnerabilitiesUpdatedAt,organizationEndpointVulnerabilitiesVulnerability.vulnerabilityV3ExploitabilityLevel,organizationEndpointVulnerabilitiesVulnerability.vulnerabilityV3BaseScore'
+    }
+    
+    if (trycount < 2):
+        try:
+            response = requests.get(urldashboard + '/vicarius-external-data-api/organizationEndpointVulnerabilities/search', params=params, headers=headers)
+            if response.status_code == 429:
+                print("O limite da API foi excedido... O programa parou e continuará em breve")
+                errors.append("API Rate Limit")
+                util.control_rate()
+                return get_endpoint_event_count(headers, urldashboard, fr0m, siz3, endpointHash, trycount + 1)
+            jsonresponse = json.loads(response.text)
+            
+            try:
+                responsecount = int(jsonresponse['serverResponseCount'])
+            except:
+                responsecount = 0
+            try: 
+                return responsecount, jsonresponse, errors
+            except Exception as e:
+                errors.append(f"Return Exception: {e},")
+                jsonresponse = {}
+                return -1, jsonresponse, errors
+            
+        except Exception as e:
+                print(f'something is wrong, will try again- EndpointHash: {endpointHash}, ')
+                errors.append(f"Exception: {e}, EndpointHash: {endpointHash}")
+                util.control_rate()
+                return get_endpoint_event_count(headers, urldashboard, fr0m, siz3, endpointHash, trycount + 1)
+    else:
+        return -1, None, errors
+    
+    
+    
