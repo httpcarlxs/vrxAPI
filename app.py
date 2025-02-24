@@ -7,10 +7,26 @@ from openpyxl.styles import Alignment, Font
 import util
 
 
+def gen_assets_report(headers, urldashboard, fr0m, siz3):
+    endpoints_map = {}
+    
+    
+    return endpoints_map
+
+
+def gen_vuln_report(headers, urldashboard, fr0m, siz3, timestamp, endpoints_map):
+    vuln_report = []
+    
+    
+    return vuln_report
+
 if __name__ == "__main__":
     API_KEY, API_URL = util.load_configuration()
     HEADERS = {
     "Authorization": f"Bearer {API_KEY}",
     "Content-Type": "application/json"
     }
+    
+    endpoints_map = gen_assets_report(HEADERS, API_URL, 0, 500)
+    vuln_report = gen_vuln_report(HEADERS, API_URL, 0, 500, 30, endpoints_map)
     
