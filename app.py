@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import time
 import re
 import pandas as pd
-import assets_report
+import assets_report, vulnerabilities_report
 from openpyxl.styles import Alignment, Font
 import util
 
@@ -32,6 +32,11 @@ def gen_assets_report(headers, urldashboard, fr0m, siz3):
 def gen_vuln_report(headers, urldashboard, fr0m, siz3, timestamp, endpoints_map):
     vuln_report = []
     
+    date_now = str(int(float(datetime.now().timestamp() * 1000)))
+    min_date = str(int(float((datetime.now() - timedelta(days=timestamp)).timestamp() * 1000)))
+    
+    for key in endpoints_map:
+        jresponse = vulnerabilities_report.get_endpoint_vulnerabilities(headers, urldashboard, fr0m, siz3, min_date, date_now, key)
     
     return vuln_report
 
