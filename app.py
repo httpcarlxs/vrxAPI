@@ -11,10 +11,12 @@ import util
 def gen_assets_report(headers, urldashboard, fr0m, siz3):
     endpoints_map = assets_report.get_endpoints(headers, urldashboard, fr0m, siz3)
     
-    util.control_rate(50)
-    
     for key in endpoints_map:
+        util.control_rate()
         assets_report.get_endpoint_attributes(headers, urldashboard, fr0m, siz3, endpoints_map, key)
+        
+        util.control_rate()
+        assets_report.get_endpoint_patches(headers, urldashboard, fr0m, siz3, endpoints_map, key)
     
     return endpoints_map
 
