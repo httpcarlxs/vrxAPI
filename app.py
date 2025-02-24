@@ -54,3 +54,9 @@ if __name__ == "__main__":
     endpoints_map = gen_assets_report(HEADERS, API_URL, 0, 500)
     vuln_report = gen_vuln_report(HEADERS, API_URL, 0, 500, 30, endpoints_map)
     
+    assets_data = [{key: value for key, value in asset} for asset in endpoints_map.values()]
+    df_hosts = pd.DataFrame(assets_data)
+    
+    vuln_data = [{key: value for key, value in vuln} for vuln in vuln_report]
+    df_vuln = pd.DataFrame(vuln_data)
+    
