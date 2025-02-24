@@ -48,3 +48,22 @@ def get_endpoint_attributes(headers, urldashboard, fr0m, siz3, endpoints_map, en
                     ipAddresses += obj[line]['attributeExternalId'] + ', '
                     
     endpoints_map[endpoint_hash].append(('IP', ipAddresses[:-2]))
+    
+    
+def get_endpoints_count(headers, urldashboard):
+    params = {
+        'from': 0,
+        'size': 1,
+        'sort': '+endpointId'
+    }
+
+    try:
+        response = requests.get(urldashboard + '/vicarius-external-data-api/endpoint/search', params=params, headers=headers)
+        json_response = json.loads(response.text)
+        response_count = json_response['serverResponseCount']
+
+    except:
+        print("something is wrong, will try again....")
+        print("response: ", response.text)
+
+    return response_count
