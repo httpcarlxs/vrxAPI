@@ -37,6 +37,9 @@ def gen_vuln_report(headers, urldashboard, fr0m, siz3, timestamp, endpoints_map)
     
     for key in endpoints_map:
         jresponse = vulnerabilities_report.get_endpoint_vulnerabilities(headers, urldashboard, fr0m, siz3, min_date, date_now, key)
+        assetVulnerabilitiesReport = vulnerabilities_report.parse_endpoint_vulnerabilities(jresponse)
+        if len(assetVulnerabilitiesReport) > 0:
+            vuln_report.extend(assetVulnerabilitiesReport)
     
     return vuln_report
 
