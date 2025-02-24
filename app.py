@@ -3,12 +3,13 @@ from datetime import datetime, timedelta
 import time
 import re
 import pandas as pd
+import assets_report
 from openpyxl.styles import Alignment, Font
 import util
 
 
 def gen_assets_report(headers, urldashboard, fr0m, siz3):
-    endpoints_map = {}
+    endpoints_map = assets_report.get_endpoints()
     
     
     return endpoints_map
