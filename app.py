@@ -1,10 +1,6 @@
-import os, requests, json
 from datetime import datetime, timedelta
-import time
-import re
 import pandas as pd
 import assets_report, vulnerabilities_report
-from openpyxl.styles import Alignment, Font
 import util
 
 
@@ -44,11 +40,38 @@ def gen_vuln_report(headers, urldashboard, fr0m, siz3, timestamp, endpoints_map)
     return vuln_report
 
 
+def gen_excel_file(file_name, df_hosts, df_vuln, prefixes, column_widths):
+    with pd.ExcelWriter(f"report/{file_name}", engine="openpyxl") as writer:
+        util.split_and_write(writer, "Hosts", df_hosts, prefixes, column_widths)
+        util.split_and_write(writer, "Vulnerabilities", df_vuln, prefixes, column_widths)
+
+    print(f"Arquivo salvo como {file_name}")
+
+
 if __name__ == "__main__":
     API_KEY, API_URL = util.load_configuration()
+    
     HEADERS = {
     "Authorization": f"Bearer {API_KEY}",
     "Content-Type": "application/json"
+    }
+    
+    COLUMN_WIDTHS = {
+        "Hosts": {
+            'Hostname': 17, 'IP': 17, 
+            'Sistema Operacional': 15, 
+            'Agent Version': 11, 'CVE\'s': 11, 'Atualizações': 12, 
+            'Atualizações do SO': 50, 'Atualizações de Apps': 50
+        },
+        "Vulnerabilities": {
+            'Hostname': 17, 
+            'Product Name': 15, 'Patch Name': 22, 
+            'Patch ID': 10, 'CVE': 15, 'CVE Severity': 10, 'V3 Base Score': 10, 'Exploitability Level': 12, 
+            'Vulnerability ID': 12, 'Patch Release Date': 12, 'Vulnerability Creation Date': 15, 
+            'Last Updated': 12,  
+            'Link': 40, 
+            'Description': 70
+        }
     }
     
     endpoints_map = gen_assets_report(HEADERS, API_URL, 0, 500)
@@ -60,3 +83,5 @@ if __name__ == "__main__":
     vuln_data = [{key: value for key, value in vuln} for vuln in vuln_report]
     df_vuln = pd.DataFrame(vuln_data)
     
+    prefixes = prefixes = ["SP", "RJ", "RS"]
+    gen_excel_file("vrx_reports.xlsx", df_hosts, df_vuln, prefixes, COLUMN_WIDTHS)
