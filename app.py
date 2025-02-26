@@ -2,9 +2,12 @@ from datetime import datetime, timedelta
 import pandas as pd
 import assets_report, vulnerabilities_report
 import util
+import requests, json
+from io import BytesIO
 
 
 def gen_assets_report(headers, urldashboard, fr0m, siz3):
+    util.control_rate()
     endpoints_map = assets_report.get_endpoints(headers, urldashboard, fr0m, siz3)
     
     for key in endpoints_map:
@@ -33,6 +36,7 @@ def gen_vuln_report(headers, urldashboard, fr0m, siz3, timestamp, endpoints_map)
     
     for key in endpoints_map:
         jresponse = vulnerabilities_report.get_endpoint_vulnerabilities(headers, urldashboard, fr0m, siz3, min_date, date_now, key)
+        print(json.dumps(jresponse,indent=4))
         assetVulnerabilitiesReport = vulnerabilities_report.parse_endpoint_vulnerabilities(jresponse)
         if len(assetVulnerabilitiesReport) > 0:
             vuln_report.extend(assetVulnerabilitiesReport)
@@ -49,11 +53,12 @@ def gen_excel_file(file_name, df_hosts, df_vuln, prefixes, column_widths):
 
 
 if __name__ == "__main__":
-    API_KEY, API_URL = util.load_configuration()
+    API_KEY, API_URL, DESCRIPTION_FILE_URL, DESCRIPTION_FILE_PATH = util.load_configuration()
+    print(DESCRIPTION_FILE_URL, DESCRIPTION_FILE_PATH)
     
     HEADERS = {
-    "Authorization": f"Bearer {API_KEY}",
-    "Content-Type": "application/json"
+        'Accept': 'application/json',
+        'Vicarius-Token': API_KEY,
     }
     
     COLUMN_WIDTHS = {
@@ -74,7 +79,10 @@ if __name__ == "__main__":
         }
     }
     
+    print('Gerando relatório de hosts...')
     endpoints_map = gen_assets_report(HEADERS, API_URL, 0, 500)
+    
+    print('Gerando relatório de vulnerabilidades...')
     vuln_report = gen_vuln_report(HEADERS, API_URL, 0, 500, 30, endpoints_map)
     
     assets_data = [{key: value for key, value in asset} for asset in endpoints_map.values()]
@@ -83,5 +91,25 @@ if __name__ == "__main__":
     vuln_data = [{key: value for key, value in vuln} for vuln in vuln_report]
     df_vuln = pd.DataFrame(vuln_data)
     
-    prefixes = prefixes = ["SP", "RJ", "RS"]
+    response = requests.get(DESCRIPTION_FILE_URL)
+    df_description = None
+    if response.status_code == 200:
+#        df_description = pd.read_excel(BytesIO(response.content), usecols=[["Name", "Notes"]])
+        df_description = pd.read_excel(BytesIO(response.content), usecols=["Column1", "Column9"])
+        print("Arquivo carregado com sucesso.")
+    else:
+        print(f"Erro ao baixar o arquivo: {response.status_code}")
+        
+    if df_description is None:
+        try:
+            df_description = pd.read_excel(DESCRIPTION_FILE_PATH, usecols=["Column1", "Column9"])            
+        except:
+            print("Erro ao carregar o arquivo... relatório de hosts não terá suas respectivas descrições.")
+    
+    if df_description is not None and not df_description.empty:
+        df_description.rename(columns={"Column1": "Hostname", "Column9": "Descrição"}, inplace=True)
+        df_hosts = df_hosts.merge(df_description, on="Hostname", how="left")
+        df_hosts.method({"Descrição": "Sem descrição"}, inplace=True)
+        
+    prefixes = ["SP", "RJ", "RS"]
     gen_excel_file("vrx_reports.xlsx", df_hosts, df_vuln, prefixes, COLUMN_WIDTHS)
