@@ -13,6 +13,10 @@ def get_endpoint_vulnerabilities(headers, urldashboard, fr0m, siz3, min_date, ma
     jresponse = []
     try:
         response = requests.get(urldashboard + '/vicarius-external-data-api/organizationEndpointVulnerabilities/search', params=params, headers=headers)
+        if response.status_code == 429:
+            print("O limite da API foi excedido... O programa parou e continuará em breve")
+            util.control_rate()
+            response = get_endpoint_vulnerabilities(headers, urldashboard, fr0m, siz3, min_date, max_date, endpoint_hash)
         jresponse = json.loads(response.text)
   
     except:
@@ -25,6 +29,7 @@ def get_endpoint_vulnerabilities(headers, urldashboard, fr0m, siz3, min_date, ma
 
 def parse_endpoint_vulnerabilities(jresponse):
     vuln_report = []
+    vuln_set = set()
     index = 0
 
     for i in jresponse['serverResponseObject']:
@@ -78,7 +83,8 @@ def parse_endpoint_vulnerabilities(jresponse):
         
         vulnerability_v3_exploitability_level = i['organizationEndpointVulnerabilitiesVulnerability']['vulnerabilityV3ExploitabilityLevel']
         vulnerability_v3_base_score = i['organizationEndpointVulnerabilitiesVulnerability']['vulnerabilityV3BaseScore']
-
-        vuln_report.append([('Hostname', asset), ('Product Name', product_name), ('CVE Severity', sensitivity_level_name), ('CVE', cve), ('Vulnerability ID', vulid), ('Patch ID', patchid), ('Patch Name', patch_name), ('Patch Release Date', patch_release_date), ('Vulnerability Creation Date', create_at), ('Last Updated', update_at), ('Link', link), ('Description', vulnerability_summary), ('V3 Base Score', vulnerability_v3_base_score), ('Exploitability Level', vulnerability_v3_exploitability_level)])
+        vuln = [('Hostname', asset), ('Product Name', product_name), ('CVE Severity', sensitivity_level_name), ('CVE', cve), ('Vulnerability ID', vulid), ('Patch ID', patchid), ('Patch Name', patch_name), ('Patch Release Date', patch_release_date), ('Vulnerability Creation Date', create_at), ('Last Updated', update_at), ('Link', link), ('Description', vulnerability_summary), ('V3 Base Score', vulnerability_v3_base_score), ('Exploitability Level', vulnerability_v3_exploitability_level)]
+        if vuln not in vuln_report:
+            vuln_report.append(vuln)
 
     return vuln_report

@@ -35,6 +35,8 @@ def get_endpoint_attributes(headers, urldashboard, fr0m, siz3, endpoints_map, en
     try:
         response = requests.get(urldashboard + '/vicarius-external-data-api/endpointAttributes/search', params=params, headers=headers)
         parsed = json.loads(response.text) 
+        if response.status_code == 429:
+            print("O limite da API foi excedido...")
         
     except:
         print(f"Falha ao consultar atributos do endpoint: {endpoints_map[endpoint_hash][0][1]}.")
@@ -141,6 +143,7 @@ def get_endpoint_event_count(headers, urldashboard, fr0m, siz3, endpointHash, tr
                 util.control_rate()
                 return get_endpoint_event_count(headers, urldashboard, fr0m, siz3, endpointHash, trycount + 1)
             jsonresponse = json.loads(response.text)
+            #print(json.dumps(jsonresponse,indent=4))
             
             try:
                 responsecount = int(jsonresponse['serverResponseCount'])

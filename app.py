@@ -121,5 +121,5 @@ if __name__ == "__main__":
         df_hosts = df_hosts[colunas_ordenadas]
         
     prefixes = ["SP", "RJ", "RS"]
-    file_name = 'vrx_reports' + datetime.datetime.now().strftime('%d-%m-%Y') + '.xlsx'
+    file_name = 'vrx_reports' + datetime.now().strftime('%d-%m-%Y') + '.xlsx'
     gen_excel_file(file_name, df_hosts, df_vuln, prefixes, COLUMN_WIDTHS)
