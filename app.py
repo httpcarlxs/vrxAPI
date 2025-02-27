@@ -35,6 +35,7 @@ def gen_vuln_report(headers, urldashboard, fr0m, siz3, timestamp, endpoints_map)
     min_date = str(int(float((datetime.now() - timedelta(days=timestamp)).timestamp() * 1000)))
     
     for key in endpoints_map:
+        util.control_rate()
         jresponse = vulnerabilities_report.get_endpoint_vulnerabilities(headers, urldashboard, fr0m, siz3, min_date, date_now, key)
         print(json.dumps(jresponse,indent=4))
         assetVulnerabilitiesReport = vulnerabilities_report.parse_endpoint_vulnerabilities(jresponse)
@@ -66,6 +67,7 @@ if __name__ == "__main__":
             'Hostname': 17, 'IP': 17, 
             'Sistema Operacional': 15, 
             'Agent Version': 11, 'CVE\'s': 11, 'Atualizações': 12, 
+            'Descrição': 40,
             'Atualizações do SO': 50, 'Atualizações de Apps': 50
         },
         "Vulnerabilities": {
@@ -108,8 +110,16 @@ if __name__ == "__main__":
     
     if df_description is not None and not df_description.empty:
         df_description.rename(columns={"Column1": "Hostname", "Column9": "Descrição"}, inplace=True)
+        
+        df_hosts["Hostname"] = df_hosts["Hostname"].str.upper()
+        df_description["Hostname"] = df_description["Hostname"].str.upper()
+
         df_hosts = df_hosts.merge(df_description, on="Hostname", how="left")
-        df_hosts.method({"Descrição": "Sem descrição"}, inplace=True)
+        df_hosts.fillna({"Descrição": "Sem descrição"}, inplace=True)
+        
+        colunas_ordenadas = ['Hostname', 'Descrição'] + [col for col in df_hosts.columns if col not in ['Hostname', 'Descrição']]
+        df_hosts = df_hosts[colunas_ordenadas]
         
     prefixes = ["SP", "RJ", "RS"]
-    gen_excel_file("vrx_reports.xlsx", df_hosts, df_vuln, prefixes, COLUMN_WIDTHS)
+    file_name = 'vrx_reports' + datetime.datetime.now().strftime('%d-%m-%Y') + '.xlsx'
+    gen_excel_file(file_name, df_hosts, df_vuln, prefixes, COLUMN_WIDTHS)
