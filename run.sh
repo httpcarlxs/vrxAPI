@@ -10,6 +10,11 @@ if [ "$1" != "--dias" ] || [ -z "$2" ]; then
 fi
 
 DAYS="$2"
+if ! dpkg -s python3.10-venv >/dev/null 2>&1; then
+    sudo apt update
+    sudo apt install python3.10-venv
+fi
+
 
 if [ ! -d "venv" ]; then
     echo "Criando ambiente virtual..."
