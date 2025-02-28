@@ -67,7 +67,7 @@ def get_endpoints_count(headers, urldashboard):
 
     except:
         print("something is wrong, will try again....")
-        print("response: ", response.text)
+        #print("response: ", response.text)
         return
 
     return response_count
@@ -149,7 +149,7 @@ def get_endpoint_event_count(headers, urldashboard, fr0m, siz3, endpointHash, tr
             for i in jsonresponse['serverResponseObject']:
                 cve = str(i['organizationEndpointVulnerabilitiesVulnerability']['vulnerabilityExternalReference']['externalReferenceExternalId'])
                 cves_set.add(cve)
-                print(i)
+                #print(i)
             
             responsecount = len(cves_set)
             try: 
