@@ -3,8 +3,8 @@ from datetime import datetime
 from openpyxl.styles import Alignment, Font
 
 def load_configuration():
-    api_key = os.getenv('API_KEY_ESPM')
-    api_url = os.getenv('API_URL_ESPM')
+    api_key = os.getenv('API_KEY')
+    api_url = os.getenv('API_URL')
     description_file_url = os.getenv('DESCRIPTION_FILE_URL')
     description_file_path = os.getenv('DESCRIPTION_FILE_PATH')
     return api_key, api_url, description_file_url, description_file_path
