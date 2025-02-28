@@ -4,10 +4,12 @@ Esta aplicação foi criada para gerar relatórios personalizados utilizando a A
 ## Configuração
 ### Variáveis de ambiente
 Entre no diretório do projeto crie um arquivo chamado ".env". Esse arquivo deve ter o seguinte conteúdo:
+```ini
 API_KEY="<CHAVE_API_VICARIUS>"
 API_URL="https://<EMPRESA>.vicarius.cloud"
 DESCRIPTION_FILE_URL="<LINK_PLANILHA_DESCRIÇÕES>"
 DESCRIPTION_FILE_PATH="<PATH_PLANILHA_DE_DESCRIÇÕES>"
+```
 
 **Importante:** As variáveis de ambiente guardam informações necessárias para o acesso de dados da empresa no portal vRx. Por isso, **não compartilhe esse arquivo**, ele deve ser apenas criado e preenchido localmente.
 
