@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import assets_report, vulnerabilities_report
 import util
-import requests, json
+import requests, json, sys
 from io import BytesIO
 
 
@@ -54,6 +54,12 @@ def gen_excel_file(file_name, df_hosts, df_vuln, prefixes, column_widths):
 
 
 if __name__ == "__main__":
+    
+    if len(sys.argv) > 1:
+        min_date = sys.argv[1]
+    else:
+        min_date = 30
+    
     API_KEY, API_URL, DESCRIPTION_FILE_URL, DESCRIPTION_FILE_PATH = util.load_configuration()
     print(DESCRIPTION_FILE_URL, DESCRIPTION_FILE_PATH)
     
