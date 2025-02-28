@@ -145,10 +145,13 @@ def get_endpoint_event_count(headers, urldashboard, fr0m, siz3, endpointHash, tr
             jsonresponse = json.loads(response.text)
             #print(json.dumps(jsonresponse,indent=4))
             
-            try:
-                responsecount = int(jsonresponse['serverResponseCount'])
-            except:
-                responsecount = 0
+            cves_set = set()
+            for i in jsonresponse['serverResponseObject']:
+                cve = str(i['organizationEndpointVulnerabilitiesVulnerability']['vulnerabilityExternalReference']['externalReferenceExternalId'])
+                cves_set.add(cve)
+                print(i)
+            
+            responsecount = len(cves_set)
             try: 
                 return responsecount, jsonresponse, errors
             except Exception as e:
@@ -163,6 +166,4 @@ def get_endpoint_event_count(headers, urldashboard, fr0m, siz3, endpointHash, tr
                 return get_endpoint_event_count(headers, urldashboard, fr0m, siz3, endpointHash, trycount + 1)
     else:
         return -1, None, errors
-    
-    
     
